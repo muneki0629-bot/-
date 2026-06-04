@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Albion Market">
+<meta name="theme-color" content="#c9a84c">
+<link rel="manifest" href="manifest.json">
+<title>Albion Market - 経済サバイバル</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#c9a84c;--gold-light:#e8c97a;--gold-dim:#7a5f28;
+    --bg:#0d0a06;--bg2:#161008;--panel:#1a1206;--panel2:#221a08;
+    --border:#3a2a0a;--border-bright:#5a420f;
+    --text:#e8d8b0;--text-dim:#8a7040;
+    --red:#c44;--green:#4a8;--blue:#4af;
+    --t1:#888;--t2:#4a8;--t3:#4af;--t4:#c9a84c;--t5:#c44;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Crimson Text',serif;font-size:15px;min-height:100vh;
+    background-image:radial-gradient(ellipse 80% 50% at 50% -10%,#2a1a0420 0%,transparent 70%),
+    repeating-linear-gradient(0deg,transparent,transparent 40px,#ffffff04 40px,#ffffff04 41px),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,#ffffff04 40px,#ffffff04 41px);}
+  header{text-align:center;padding:16px 20px 10px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#1a0e0080 0%,transparent 100%);position:relative;}
+  header::before{content:'⚔';position:absolute;left:20px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--gold-dim);}
+  header::after{content:'⚔';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--gold-dim);}
+  h1{font-family:'Cinzel',serif;font-size:clamp(15px,3vw,28px);font-weight:900;color:var(--gold);letter-spacing:4px;text-shadow:0 0 30px #c9a84c60,0 2px 4px #000;}
+  .subtitle{font-size:10px;color:var(--text-dim);letter-spacing:3px;margin-top:3px;font-family:'Cinzel',serif;text-transform:uppercase;}
+
+  .status-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);}
+  .stat{flex:1;padding:6px 8px;border-right:1px solid var(--border);text-align:center;}
+  .stat:last-child{border-right:none;}
+  .stat-label{font-size:8px;color:var(--text-dim);letter-spacing:2px;font-family:'Cinzel',serif;text-transform:uppercase;}
+  .stat-value{font-size:16px;font-weight:600;color:var(--gold);margin-top:1px;}
+  .stat-value.green{color:var(--green);}
+
+  .turn-bar{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .turn-btn{background:linear-gradient(135deg,#3a2a08,#1e1508);border:1px solid var(--gold-dim);color:var(--gold);
+    padding:6px 18px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;transition:all 0.2s;}
+  .turn-btn:hover{background:linear-gradient(135deg,#5a4010,#3a2808);border-color:var(--gold);}
+  .timer-display{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-dim);display:flex;align-items:center;gap:6px;}
+  .timer-circle{width:34px;height:34px;border-radius:50%;border:2px solid var(--border-bright);position:relative;display:flex;align-items:center;justify-content:center;}
+  .timer-svg{position:absolute;top:-2px;left:-2px;transform:rotate(-90deg);}
+  .timer-num{font-size:9px;color:var(--gold);font-weight:700;z-index:1;}
+
+  /* レイアウト：採集は左固定、右側タブ切り替え */
+  .main{display:grid;grid-template-columns:220px 1fr;gap:0;border-bottom:1px solid var(--border);}
+  @media(max-width:600px){.main{grid-template-columns:1fr;}}
+  .panel{border-right:1px solid var(--border);padding:11px;}
+  .panel:last-child{border-right:none;}
+  .panel-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim);
+    text-transform:uppercase;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;}
+
+  /* タブ */
+  .tab-area{display:flex;flex-direction:column;}
+  .tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);}
+  .tab-btn{flex:1;padding:10px 4px;background:none;border:none;border-bottom:2px solid transparent;
+    color:var(--text-dim);cursor:pointer;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;
+    text-align:center;transition:all 0.15s;position:relative;}
+  .tab-btn:hover{color:var(--text);background:#1a1208;}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--panel);}
+  .tab-badge{position:absolute;top:4px;right:6px;background:#c44;color:#fff;border-radius:8px;
+    font-size:8px;padding:1px 4px;font-family:'Cinzel',serif;min-width:14px;text-align:center;}
+  .tab-content{display:none;padding:12px;min-height:300px;overflow-y:auto;max-height:520px;}
+  .tab-content.active{display:block;}
+
+  /* レア度 */
+  .tier{display:inline-block;font-family:'Cinzel',serif;font-size:8px;padding:1px 4px;border-radius:3px;letter-spacing:1px;font-weight:700;margin-right:2px;}
+  .t1{color:var(--t1);border:1px solid var(--t1);background:#1a1a1a;}
+  .t2{color:var(--t2);border:1px solid var(--t2);background:#0a1a0a;}
+  .t3{color:var(--t3);border:1px solid var(--t3);background:#0a0a1a;}
+  .t4{color:var(--t4);border:1px solid var(--t4);background:#1a1208;}
+  .t5{color:var(--t5);border:1px solid var(--t5);background:#1a0808;}
+
+  /* 採集 */
+  .tier-label{font-size:9px;font-family:'Cinzel',serif;color:var(--text-dim);letter-spacing:2px;margin:7px 0 3px;text-transform:uppercase;}
+  .gather-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+  .gather-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text);
+    padding:7px 3px;border-radius:4px;cursor:pointer;transition:all 0.15s;
+    font-family:'Crimson Text',serif;font-size:12px;text-align:center;}
+  .gather-btn:hover:not(:disabled):not(.gathering){border-color:var(--gold-dim);background:#2a1e08;color:var(--gold-light);}
+  .gather-btn:disabled:not(.gathering){opacity:0.35;cursor:not-allowed;}
+  .gather-btn.gathering{cursor:not-allowed;border-color:var(--gold-dim);background:#1e1808;}
+  .mat-name{font-size:10px;color:var(--text-dim);margin-top:1px;}
+  .mat-time{font-size:9px;color:var(--text-dim);}
+  .tool-lock{font-size:9px;color:#c44;}
+  .gather-progress-bg{height:3px;background:#2a1e08;border-radius:2px;margin-top:3px;overflow:hidden;}
+  .gather-progress-bar{height:3px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:2px;transition:width 0.1s linear;}
+  .gather-countdown{font-size:9px;color:var(--gold-dim);font-family:'Cinzel',serif;}
+
+  /* インベントリ */
+  .separator{height:1px;background:var(--border);margin:7px 0;}
+  .inv-item{display:flex;align-items:center;justify-content:space-between;padding:3px 6px;margin-bottom:3px;
+    background:var(--panel2);border:1px solid var(--border);border-radius:3px;}
+  .inv-name{font-size:11px;}
+  .inv-qty{color:var(--gold);font-weight:600;font-size:12px;}
+
+  /* 加工パネル */
+  .process-item{background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:7px 8px;margin-bottom:6px;position:relative;}
+  .process-item.active{border-color:var(--gold-dim);}
+  .process-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+  .process-name{font-size:12px;font-weight:600;}
+  .process-method{font-size:9px;color:var(--text-dim);margin-bottom:4px;font-family:'Cinzel',serif;letter-spacing:1px;}
+  .process-recipe{font-size:10px;color:var(--text-dim);margin-bottom:5px;line-height:1.5;}
+  .process-btn{background:#1a1208;border:1px solid var(--gold-dim);color:var(--gold);padding:3px 9px;border-radius:3px;
+    cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;transition:all 0.15s;}
+  .process-btn:hover:not(:disabled){background:var(--gold-dim);color:var(--bg);}
+  .process-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  /* 加工プログレス */
+  .process-prog-bg{height:4px;background:#2a1e08;border-radius:2px;margin-top:5px;overflow:hidden;}
+  .process-prog-bar{height:4px;background:linear-gradient(90deg,#4af,#c9a84c);border-radius:2px;transition:width 0.1s linear;}
+  .process-countdown{font-size:9px;color:#4af;margin-top:2px;font-family:'Cinzel',serif;}
+
+  /* 道具・クラフト */
+  .craft-item{background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:7px 8px;margin-bottom:5px;}
+  .craft-item.owned{border-color:var(--gold-dim);}
+  .craft-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+  .craft-name{font-size:12px;font-weight:600;}
+  .craft-recipe{font-size:10px;color:var(--text-dim);margin-bottom:4px;line-height:1.5;}
+  .craft-btn{background:#2a1e08;border:1px solid var(--gold-dim);color:var(--gold);padding:3px 9px;border-radius:3px;
+    cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;transition:all 0.15s;}
+  .craft-btn:hover:not(:disabled){background:var(--gold-dim);color:var(--bg);}
+  .craft-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .section-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);
+    text-transform:uppercase;margin:9px 0 5px;padding-top:7px;border-top:1px solid var(--border);}
+
+  /* マーケット */
+  .market-item{background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:6px 8px;margin-bottom:5px;}
+  .market-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+  .market-name{font-size:12px;font-weight:600;}
+  .market-price{font-size:14px;color:var(--gold);font-weight:600;}
+  .market-info{font-size:9px;color:var(--text-dim);margin-bottom:4px;display:flex;gap:7px;flex-wrap:wrap;}
+  .market-row{display:flex;gap:4px;flex-wrap:wrap;}
+  .sell-btn{background:#0a2a0a;border:1px solid #2a6a2a;color:#6da;padding:2px 8px;border-radius:3px;
+    cursor:pointer;font-family:'Cinzel',serif;font-size:9px;transition:all 0.15s;}
+  .sell-btn:hover:not(:disabled){background:#2a6a2a;color:#fff;}
+  .sell-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .buy-btn{background:#0a1a2a;border:1px solid #2a4a8a;color:#8af;padding:2px 8px;border-radius:3px;
+    cursor:pointer;font-family:'Cinzel',serif;font-size:9px;transition:all 0.15s;}
+  .buy-btn:hover:not(:disabled){background:#2a4a8a;color:#fff;}
+  .buy-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .trend{font-size:11px;margin-left:2px;}
+  .trend.up{color:var(--green);}.trend.down{color:var(--red);}
+  .badge{display:inline-block;padding:1px 4px;border-radius:8px;font-size:8px;font-family:'Cinzel',serif;}
+  .badge-surplus{background:#0a2a0a;color:#6da;border:1px solid #2a5a2a;}
+  .badge-scarce{background:#2a0a0a;color:#da6;border:1px solid #5a2a2a;}
+  .badge-stable{background:#1a1a08;color:#aaa;border:1px solid #3a3a18;}
+
+  /* 敵 */
+  .enemy-card{background:var(--panel2);border:1px solid #5a1a1a;border-radius:5px;padding:9px;margin-bottom:6px;transition:border-color 0.2s;}
+  .enemy-card:hover{border-color:#8a2a2a;}
+  .enemy-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .enemy-name{font-size:13px;font-weight:600;color:#e8a0a0;}
+  .enemy-level{font-size:9px;color:var(--text-dim);font-family:'Cinzel',serif;}
+  .hp-bar-bg{background:#2a0a0a;border-radius:3px;height:4px;margin-bottom:6px;overflow:hidden;}
+  .hp-bar{height:4px;border-radius:3px;background:linear-gradient(90deg,#8a2a2a,#c44);transition:width 0.3s;}
+  .enemy-drop{font-size:9px;color:var(--text-dim);margin-bottom:6px;}
+  .attack-btn{background:linear-gradient(135deg,#3a0a0a,#1e0808);border:1px solid #8a2a2a;
+    color:#e8a0a0;padding:5px;border-radius:3px;cursor:pointer;font-family:'Cinzel',serif;
+    font-size:10px;letter-spacing:1px;transition:all 0.15s;width:100%;}
+  .attack-btn:hover:not(:disabled){background:linear-gradient(135deg,#5a1a1a,#3a0808);border-color:#c44;color:#fff;}
+  .spawn-btn{background:#1a0808;border:1px dashed #5a2a2a;color:#8a4a4a;
+    padding:6px;border-radius:4px;cursor:pointer;width:100%;
+    font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;transition:all 0.2s;margin-top:4px;}
+  .spawn-btn:hover{border-color:#c44;color:#e8a0a0;background:#2a0a0a;}
+  @keyframes flashRed{0%{background:#3a0a0a;}50%{background:#6a1a1a;}100%{background:var(--panel2);}}
+  .enemy-flash{animation:flashRed 0.3s ease;}
+
+  /* ログ */
+  .log-section{padding:9px 14px;}
+  .log-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px;}
+  #log{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:6px 10px;height:95px;overflow-y:auto;font-size:11px;line-height:1.7;}
+  #log::-webkit-scrollbar{width:3px;}
+  #log::-webkit-scrollbar-track{background:var(--bg2);}
+  #log::-webkit-scrollbar-thumb{background:var(--border-bright);}
+  .log-entry.good{color:#8da;}.log-entry.bad{color:#da8;}.log-entry.event{color:#adf;}.log-entry.info{color:var(--text-dim);}.log-entry.combat{color:#e8a0a0;}
+
+  /* フロー矢印 */
+  .flow-arrow{text-align:center;color:var(--gold-dim);font-size:14px;margin:4px 0;line-height:1;}
+
+  /* ドロップ抽選ポップアップ */
+  .drop-overlay{
+    position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;
+    z-index:999;opacity:0;pointer-events:none;transition:opacity 0.2s;
+  }
+  .drop-overlay.show{opacity:1;pointer-events:auto;}
+  .drop-modal{
+    background:linear-gradient(160deg,#1e1508,#0d0a06);
+    border:1px solid var(--gold-dim);border-radius:8px;
+    padding:22px 24px;min-width:270px;max-width:340px;width:90%;
+    text-align:center;
+    box-shadow:0 0 50px #c9a84c25;
+    transform:scale(0.88);transition:transform 0.2s;
+  }
+  .drop-overlay.show .drop-modal{transform:scale(1);}
+  .drop-modal-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gold-dim);text-transform:uppercase;margin-bottom:10px;}
+  .drop-enemy-name{font-size:20px;font-weight:700;color:#e8a0a0;margin-bottom:2px;}
+  .drop-defeated{font-size:10px;color:var(--text-dim);margin-bottom:14px;letter-spacing:2px;font-family:'Cinzel',serif;}
+  .drop-items{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .drop-item{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:6px 10px;}
+  .drop-item.key-item{border-color:var(--gold);background:#221a06;animation:keyGlow 1.2s ease infinite alternate;}
+  @keyframes keyGlow{from{box-shadow:0 0 4px #c9a84c40;}to{box-shadow:0 0 14px #c9a84c90;}}
+  .drop-item-emoji{font-size:18px;}
+  .drop-item-name{font-size:13px;font-weight:600;flex:1;text-align:left;}
+  .drop-item.key-item .drop-item-name{color:var(--gold);}
+  .drop-item-qty{font-size:12px;color:var(--gold);font-weight:700;}
+  .drop-no-key{font-size:11px;color:var(--text-dim);margin-bottom:10px;font-style:italic;}
+  .drop-close-btn{background:linear-gradient(135deg,#3a2a08,#1e1508);border:1px solid var(--gold-dim);
+    color:var(--gold);padding:7px 24px;border-radius:4px;cursor:pointer;
+    font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;transition:all 0.15s;}
+  .drop-close-btn:hover{background:linear-gradient(135deg,#5a4010,#3a2808);border-color:var(--gold);}
+
+  /* ダンジョン */
+  .dungeon-list{display:flex;flex-direction:column;gap:8px;}
+  .dungeon-card{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;transition:border-color 0.2s;}
+  .dungeon-card.unlocked{border-color:var(--gold-dim);}
+  .dungeon-card.locked{opacity:0.55;}
+  .dungeon-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+  .dungeon-emoji{font-size:22px;}
+  .dungeon-info{flex:1;}
+  .dungeon-name{font-size:14px;font-weight:700;color:var(--gold-light);}
+  .dungeon-key{font-size:10px;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:1px;}
+  .dungeon-waves{font-size:10px;color:var(--text-dim);margin-bottom:6px;}
+  .dungeon-rewards{font-size:10px;color:#8da;margin-bottom:8px;line-height:1.6;}
+  .dungeon-enter-btn{width:100%;padding:7px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;transition:all 0.15s;border:1px solid var(--gold-dim);background:linear-gradient(135deg,#2a1e08,#1a1006);color:var(--gold);}
+  .dungeon-enter-btn:hover:not(:disabled){background:linear-gradient(135deg,#4a3010,#2a1a08);border-color:var(--gold);}
+  .dungeon-enter-btn:disabled{opacity:0.35;cursor:not-allowed;}
+
+  /* ダンジョン戦闘オーバーレイ */
+  .dungeon-overlay{position:fixed;inset:0;background:#000d;display:flex;align-items:center;justify-content:center;z-index:998;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+  .dungeon-overlay.show{opacity:1;pointer-events:auto;}
+  .dungeon-modal{background:linear-gradient(160deg,#130e04,#0a0702);border:1px solid var(--gold-dim);border-radius:10px;padding:20px;width:92%;max-width:400px;max-height:88vh;overflow-y:auto;box-shadow:0 0 60px #c9a84c20;}
+  .dungeon-modal::-webkit-scrollbar{width:3px;}
+  .dungeon-modal::-webkit-scrollbar-thumb{background:var(--border-bright);}
+  .dungeon-modal-header{text-align:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .dungeon-modal-title{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:3px;}
+  .dungeon-wave-info{font-size:10px;color:var(--text-dim);margin-top:4px;font-family:'Cinzel',serif;letter-spacing:2px;}
+  .dungeon-progress{display:flex;gap:4px;justify-content:center;margin-top:8px;}
+  .wave-dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--border-bright);background:var(--panel2);transition:all 0.3s;}
+  .wave-dot.done{background:var(--green);border-color:var(--green);}
+  .wave-dot.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px var(--gold);}
+  .dungeon-enemy-area{margin-bottom:12px;}
+  .dungeon-enemy-card{background:#1a0a0a;border:1px solid #5a1a1a;border-radius:6px;padding:12px;text-align:center;}
+  .dungeon-enemy-emoji{font-size:40px;margin-bottom:4px;}
+  .dungeon-enemy-name{font-size:16px;font-weight:700;color:#e8a0a0;margin-bottom:6px;}
+  .dungeon-hp-label{font-size:10px;color:var(--text-dim);margin-bottom:3px;font-family:'Cinzel',serif;}
+  .dungeon-hp-bg{background:#2a0a0a;border-radius:4px;height:8px;overflow:hidden;margin-bottom:8px;}
+  .dungeon-hp-bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#8a1a1a,#c44);transition:width 0.4s;}
+  .dungeon-atk-btn{width:100%;padding:10px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;transition:all 0.15s;border:1px solid #8a2a2a;background:linear-gradient(135deg,#3a0a0a,#1e0808);color:#e8a0a0;}
+  .dungeon-atk-btn:hover:not(:disabled){background:linear-gradient(135deg,#5a1a1a,#3a0808);border-color:#c44;color:#fff;}
+  .dungeon-atk-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .dungeon-result{text-align:center;padding:16px 0;}
+  .dungeon-result-title{font-family:'Cinzel',serif;font-size:18px;font-weight:700;margin-bottom:12px;}
+  .dungeon-result-title.win{color:var(--gold);}
+  .dungeon-result-title.lose{color:var(--red);}
+  .dungeon-result-rewards{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .dungeon-reward-item{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--gold-dim);border-radius:4px;padding:6px 10px;}
+  .dungeon-reward-item.legendary{border-color:#c44;background:#1a0808;animation:keyGlow 1s ease infinite alternate;}
+  .dungeon-close-btn{background:linear-gradient(135deg,#3a2a08,#1e1508);border:1px solid var(--gold-dim);color:var(--gold);padding:8px 28px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;transition:all 0.15s;}
+  .dungeon-close-btn:hover{background:linear-gradient(135deg,#5a4010,#3a2808);border-color:var(--gold);}
+  @keyframes dungeonFlash{0%{background:#3a0a0a;}50%{background:#6a0a0a;}100%{background:#1a0a0a;}}
+  .dungeon-hit{animation:dungeonFlash 0.25s ease;}
+</style>
+</head>
+<body>
+<!-- ダンジョン戦闘オーバーレイ -->
+<div class="dungeon-overlay" id="dungeon-overlay">
+  <div class="dungeon-modal" id="dungeon-modal">
+    <div class="dungeon-modal-header">
+      <div class="dungeon-modal-title" id="dungeon-modal-title"></div>
+      <div class="dungeon-wave-info" id="dungeon-wave-info"></div>
+      <div class="dungeon-progress" id="dungeon-progress"></div>
+    </div>
+    <div class="dungeon-enemy-area" id="dungeon-enemy-area"></div>
+    <div id="dungeon-result-area"></div>
+  </div>
+</div>
+<div class="drop-overlay" id="drop-overlay" onclick="closeDropModal()">
+  <div class="drop-modal" onclick="event.stopPropagation()">
+    <div class="drop-modal-title">— 討伐報酬 —</div>
+    <div class="drop-enemy-name" id="drop-enemy-name"></div>
+    <div class="drop-defeated">を倒した！</div>
+    <div class="drop-items" id="drop-items"></div>
+    <div class="drop-no-key" id="drop-no-key"></div>
+    <button class="drop-close-btn" onclick="closeDropModal()">受け取る</button>
+  </div>
+</div>
+<header>
+  <h1>ALBION MARKET</h1>
+  <div class="subtitle">採集 → 加工 → 道具クラフト → 売買 → 戦闘</div>
+</header>
+
+<div class="status-bar">
+  <div class="stat"><div class="stat-label">所持金</div><div class="stat-value" id="gold">500G</div></div>
+  <div class="stat"><div class="stat-label">ターン</div><div class="stat-value" id="turn">1</div></div>
+  <div class="stat"><div class="stat-label">純資産</div><div class="stat-value green" id="networth">500G</div></div>
+  <div class="stat"><div class="stat-label">目標</div><div class="stat-value">5000G</div></div>
+</div>
+
+<div class="turn-bar">
+  <div class="timer-display">
+    <div class="timer-circle">
+      <svg class="timer-svg" width="38" height="38">
+        <circle id="timer-ring" cx="19" cy="19" r="15" fill="none" stroke="#c9a84c" stroke-width="2.5"
+          stroke-dasharray="94.2" stroke-dashoffset="0" stroke-linecap="round"/>
+      </svg>
+      <span class="timer-num" id="timer-num">1:30</span>
+    </div>
+    <span style="font-size:10px">1分30秒で自動ターン進行</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 左: 採集 + インベントリ（常時表示） -->
+  <div class="panel">
+    <div class="panel-title">🌿 採集</div>
+    <div id="gather-section"></div>
+    <div class="separator"></div>
+    <div class="panel-title" style="margin-top:4px">🎒 所持品</div>
+    <div id="inventory"></div>
+  </div>
+
+  <!-- 右: タブ切り替え -->
+  <div class="tab-area">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('process')" id="tab-process">
+        🔥 加工
+      </button>
+      <button class="tab-btn" onclick="switchTab('craft')" id="tab-craft">
+        🔨 クラフト
+      </button>
+      <button class="tab-btn" onclick="switchTab('market')" id="tab-market">
+        🏪 市場
+      </button>
+      <button class="tab-btn" onclick="switchTab('battle')" id="tab-battle">
+        ⚔️ 戦闘<span class="tab-badge" id="enemy-badge"></span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dungeon')" id="tab-dungeon">
+        🏰 ダンジョン<span class="tab-badge" id="dungeon-badge"></span>
+      </button>
+    </div>
+
+    <div class="tab-content active" id="tab-content-process">
+      <div style="font-size:9px;color:var(--text-dim);margin-bottom:8px;line-height:1.6;">
+        採集素材を加工して中間素材を作ります。道具クラフトに必要です。
+      </div>
+      <div id="process-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-content-craft">
+      <div id="craft-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-content-market">
+      <div id="market-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-content-battle">
+      <div id="enemy-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-content-dungeon">
+      <div style="font-size:9px;color:var(--text-dim);margin-bottom:8px;line-height:1.6;">
+        敵から入手した鍵でダンジョンに挑戦。ウェーブ制で全敵を倒すとお宝獲得！
+      </div>
+      <div class="dungeon-list" id="dungeon-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="log-section">
+  <div class="log-title">📜 活動ログ</div>
+  <div id="log"></div>
+</div>
+
+<script>
+// ======== レア度 ========
+const TIER_INFO={
+  1:{label:"T1",cls:"t1"},2:{label:"T2",cls:"t2"},3:{label:"T3",cls:"t3"},
+  4:{label:"T4",cls:"t4"},5:{label:"T5",cls:"t5"},
+};
+const TIER_NAMES=["","コモン","アンコモン","レア","エピック","レジェンド"];
+
+// ======== 素材 ========
+const MATERIALS=[
+  {name:"枯れ草",  emoji:"🌾",tier:1,duration:5, qty:[2,5],requireTool:null},
+  {name:"小石",    emoji:"🪨",tier:1,duration:5, qty:[2,5],requireTool:null},
+  {name:"薬草",    emoji:"🌿",tier:2,duration:8, qty:[2,5],requireTool:null},
+  {name:"木材",    emoji:"🪵",tier:2,duration:10,qty:[2,4],requireTool:null},
+  {name:"皮",      emoji:"🦌",tier:3,duration:15,qty:[1,4],requireTool:null},
+  {name:"鉄鉱石",  emoji:"⛏️",tier:3,duration:18,qty:[2,4],requireTool:null},
+  {name:"深層鉄鉱",emoji:"💎",tier:4,duration:25,qty:[1,3],requireTool:"採掘ツール"},
+  {name:"上質な皮",emoji:"🐉",tier:4,duration:25,qty:[1,3],requireTool:"狩猟ナイフ"},
+  {name:"霊薬草",  emoji:"🌺",tier:4,duration:22,qty:[1,3],requireTool:"採草カマ"},
+  {name:"魔法の木材",emoji:"🌳",tier:4,duration:22,qty:[1,3],requireTool:"魔法の斧"},
+  {name:"星屑鉱石",emoji:"⭐",tier:5,duration:40,qty:[1,2],requireTool:"採掘ツール"},
+  {name:"竜の鱗",  emoji:"🔥",tier:5,duration:40,qty:[1,2],requireTool:"狩猟ナイフ"},
+];
+
+// ======== 加工レシピ ========
+// method: 加工方法名（UI表示用）
+// methodEmoji: アイコン
+// duration: 加工にかかる秒数
+const PROCESSES=[
+  // 鍛冶（鉄系）
+  {name:"鉄インゴット",  emoji:"🔩",method:"鍛冶",methodEmoji:"🔨",
+   ingredients:{"鉄鉱石":3},output:1,duration:10,
+   desc:"鉄鉱石を溶かして成形"},
+  {name:"鋼鉄板",       emoji:"⚙️",method:"鍛冶",methodEmoji:"🔨",
+   ingredients:{"鉄インゴット":2,"小石":1},output:1,duration:13,
+   desc:"インゴットを叩いて板状に"},
+  // 木工（木材系）
+  {name:"加工木材",     emoji:"🪚",method:"木工",methodEmoji:"🪵",
+   ingredients:{"木材":3},output:1,duration:8,
+   desc:"木材を削って整形"},
+  {name:"木材板",       emoji:"📦",method:"木工",methodEmoji:"🪵",
+   ingredients:{"加工木材":2,"枯れ草":1},output:1,duration:9,
+   desc:"加工木材を板材に"},
+  // なめし（皮系）
+  {name:"なめし革",     emoji:"🟤",method:"なめし",methodEmoji:"🦌",
+   ingredients:{"皮":2,"薬草":1},output:1,duration:9,
+   desc:"薬草を使って皮をなめす"},
+  {name:"強化革",       emoji:"🛡️",method:"なめし",methodEmoji:"🦌",
+   ingredients:{"なめし革":2,"枯れ草":2},output:1,duration:11,
+   desc:"繊維で強化した上質な革"},
+  // 醸造（薬草系）
+  {name:"濃縮エキス",   emoji:"🧴",method:"醸造",methodEmoji:"🌿",
+   ingredients:{"薬草":4,"枯れ草":2},output:1,duration:8,
+   desc:"薬草を煮詰めて濃縮"},
+  {name:"魔法薬液",     emoji:"💧",method:"醸造",methodEmoji:"🌿",
+   ingredients:{"濃縮エキス":2,"小石":1},output:1,duration:10,
+   desc:"魔力を帯びた液体"},
+];
+
+// ======== 道具クラフト（加工素材が必要） ========
+// maxDur: 最大耐久値（採集1回ごとに1消費）
+const TOOLS=[
+  {name:"採掘ツール",emoji:"⛏️",maxDur:10,
+   ingredients:{"鉄インゴット":2,"木材板":1},
+   desc:"T4〜T5の鉱石採集可能 / 耐久10"},
+  {name:"狩猟ナイフ",emoji:"🗡️",maxDur:10,
+   ingredients:{"鋼鉄板":1,"なめし革":1},
+   desc:"T4〜T5の皮採集可能 / 耐久10"},
+  {name:"採草カマ",  emoji:"🌾",maxDur:12,
+   ingredients:{"鉄インゴット":1,"加工木材":2},
+   desc:"T4の霊薬草採集可能 / 耐久12"},
+  {name:"魔法の斧",  emoji:"🪓",maxDur:12,
+   ingredients:{"木材板":2,"濃縮エキス":1},
+   desc:"T4の魔法の木材採集可能 / 耐久12"},
+];
+
+// ======== 装備・消耗品レシピ ========
+// maxDur: 武器の最大耐久（攻撃1回ごとに1消費）
+const RECIPES=[
+  {name:"鉄の剣",        emoji:"⚔️",tier:3,maxDur:15,ingredients:{"鉄インゴット":2,"加工木材":1}},
+  {name:"革の鎧",        emoji:"🛡️",tier:3,maxDur:0, ingredients:{"強化革":2,"木材板":1}},
+  {name:"回復ポーション", emoji:"🧪",tier:2,maxDur:0, ingredients:{"濃縮エキス":2}},
+  {name:"上質な剣",      emoji:"🗡️",tier:4,maxDur:20,ingredients:{"鋼鉄板":2,"魔法薬液":1}},
+  {name:"竜の鎧",        emoji:"🔱",tier:5,maxDur:0, ingredients:{"竜の鱗":3,"上質な皮":2,"鋼鉄板":1}},
+  {name:"霊薬ポーション", emoji:"💜",tier:4,maxDur:0, ingredients:{"魔法薬液":2,"濃縮エキス":1}},
+];
+
+// ======== 市場 ========
+const MARKET_INIT={
+  "枯れ草":{price:10,supply:300,demand:200},"小石":{price:10,supply:300,demand:180},
+  "薬草":{price:20,supply:250,demand:200},"木材":{price:30,supply:220,demand:180},
+  "皮":{price:40,supply:150,demand:120},"鉄鉱石":{price:50,supply:150,demand:120},
+  "深層鉄鉱":{price:150,supply:60,demand:50},"上質な皮":{price:130,supply:60,demand:50},
+  "霊薬草":{price:120,supply:70,demand:55},"魔法の木材":{price:110,supply:80,demand:60},
+  "星屑鉱石":{price:400,supply:20,demand:18},"竜の鱗":{price:500,supply:15,demand:14},
+  // 加工素材
+  "鉄インゴット":{price:120,supply:80,demand:60},"鋼鉄板":{price:220,supply:40,demand:35},
+  "加工木材":{price:70,supply:100,demand:80},"木材板":{price:130,supply:60,demand:50},
+  "なめし革":{price:80,supply:80,demand:65},"強化革":{price:160,supply:40,demand:35},
+  "濃縮エキス":{price:60,supply:100,demand:80},"魔法薬液":{price:150,supply:50,demand:40},
+  // 道具
+  "採掘ツール":{price:350,supply:30,demand:25},"狩猟ナイフ":{price:350,supply:30,demand:25},
+  "採草カマ":{price:280,supply:30,demand:25},"魔法の斧":{price:280,supply:30,demand:25},
+  // 装備・消耗品
+  "鉄の剣":{price:500,supply:30,demand:25},"革の鎧":{price:400,supply:35,demand:30},
+  "回復ポーション":{price:120,supply:80,demand:60},"上質な剣":{price:1400,supply:10,demand:9},
+  "竜の鎧":{price:3000,supply:5,demand:4},"霊薬ポーション":{price:400,supply:25,demand:20},
+};
+
+// ======== STATE ========
+const state={
+  gold:500,turn:1,goal:5000,
+  inventory:{},
+  tools:{},      // { 道具名: 個数 } ※耐久は durability で別管理
+  durability:{}, // { アイテム名: 現在耐久値 } 道具・武器共用
+  enemies:[],
+  market:Object.fromEntries(Object.entries(MARKET_INIT).map(([k,v])=>([k,{...v,prevPrice:v.price}]))),
+};
+const gatherTimers={};
+const processTimers={}; // 加工タイマー
+
+// ======== 敵 ========
+// keyDrop: ダンジョン鍵ドロップ確率
+const ENEMY_TYPES=[
+  {name:"ゴブリン",    emoji:"👺",maxHp:150, atk:8, drops:[{name:"枯れ草",qty:[1,3]},{name:"薬草",qty:[1,2]}],  rare:{name:"鉄インゴット",prob:0.1}, keyDrop:{name:"古びた鍵",emoji:"🗝️",prob:0.08}},
+  {name:"オーク戦士",  emoji:"👹",maxHp:300, atk:15,drops:[{name:"鉄鉱石",qty:[2,3]},{name:"皮",qty:[1,2]}],   rare:{name:"鉄インゴット",prob:0.25},keyDrop:{name:"石造りの鍵",emoji:"🔑",prob:0.12}},
+  {name:"スケルトン",  emoji:"💀",maxHp:220, atk:10,drops:[{name:"木材",qty:[2,3]},{name:"小石",qty:[2,4]}],   rare:{name:"加工木材",prob:0.2},    keyDrop:{name:"古びた鍵",emoji:"🗝️",prob:0.10}},
+  {name:"ウルフ",      emoji:"🐺",maxHp:200, atk:12,drops:[{name:"皮",qty:[2,3]},{name:"薬草",qty:[2,3]}],     rare:{name:"なめし革",prob:0.2},    keyDrop:{name:"古びた鍵",emoji:"🗝️",prob:0.07}},
+  {name:"ダークメイジ",emoji:"🧙",maxHp:280, atk:20,drops:[{name:"霊薬草",qty:[1,2]},{name:"濃縮エキス",qty:[1,2]}],rare:{name:"魔法薬液",prob:0.2},keyDrop:{name:"魔封の鍵",emoji:"🔮",prob:0.15}},
+  {name:"トロール",    emoji:"🗿",maxHp:500, atk:25,drops:[{name:"深層鉄鉱",qty:[2,3]},{name:"鋼鉄板",qty:[1,2]}],rare:{name:"採掘ツール",prob:0.1},keyDrop:{name:"石造りの鍵",emoji:"🔑",prob:0.18}},
+  {name:"ドラゴン",    emoji:"🐲",maxHp:900, atk:40,drops:[{name:"竜の鱗",qty:[1,3]},{name:"星屑鉱石",qty:[1,2]}],rare:{name:"竜の鎧",prob:0.08},  keyDrop:{name:"竜の鍵",emoji:"🔥🔑",prob:0.25}},
+];
+let eid=0;
+function createEnemy(){const t=ENEMY_TYPES[Math.floor(Math.random()*ENEMY_TYPES.length)];return{id:++eid,...t,hp:t.maxHp,respawnTimer:null,respawnRemaining:0};}
+
+// スロット4つ固定。倒されたスロットは個別タイマーで復活
+const ENEMY_SLOTS=4;
+const RESPAWN_SECS=30; // 復活までの秒数
+
+function initEnemies(){
+  state.enemies=[];
+  for(let i=0;i<ENEMY_SLOTS;i++){
+    const e=createEnemy();
+    e.slotIndex=i;
+    state.enemies.push(e);
+  }
+  addLog(`👹 戦場に4体の敵が現れた！`,"combat");
+}
+
+function scheduleRespawn(slotIndex){
+  // 既存スロットに「復活待ち」エントリを入れる
+  const ghost={
+    id:++eid,
+    slotIndex,
+    hp:0,maxHp:0,atk:0,
+    name:"",emoji:"",drops:[],rare:null,keyDrop:null,
+    respawnRemaining:RESPAWN_SECS,
+    isRespawning:true,
+    respawnInterval:null,
+  };
+  state.enemies[slotIndex]=ghost;
+  render();
+  ghost.respawnInterval=setInterval(()=>{
+    ghost.respawnRemaining--;
+    renderEnemySlot(slotIndex);
+    if(ghost.respawnRemaining<=0){
+      clearInterval(ghost.respawnInterval);
+      const newEnemy=createEnemy();
+      newEnemy.slotIndex=slotIndex;
+      state.enemies[slotIndex]=newEnemy;
+      addLog(`👹 ${newEnemy.emoji}${newEnemy.name} が現れた！`,"combat");
+      render();
+    }
+  },1000);
+}
+
+// ======== ユーティリティ ========
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function hasTool(n){return(state.tools[n]||0)>0&&(state.durability[n]||0)>0;}
+function tierBadge(t){const i=TIER_INFO[t];return`<span class="tier ${i.cls}">${i.label}</span>`;}
+function invCount(n){return(state.inventory[n]||0)+(state.tools[n]||0);}
+
+// 耐久バーHTML生成
+function durBar(name,maxDur){
+  const cur=state.durability[name]||0;
+  const pct=Math.round(cur/maxDur*100);
+  const col=pct>50?'#4a8':pct>25?'#c9a84c':'#c44';
+  return `<div style="margin-top:3px">
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:2px">
+      <span>耐久</span><span style="color:${col}">${cur}/${maxDur}</span>
+    </div>
+    <div style="background:#2a1e08;border-radius:2px;height:4px;overflow:hidden">
+      <div style="width:${pct}%;height:4px;background:${col};border-radius:2px;transition:width 0.3s"></div>
+    </div>
+  </div>`;
+}
+
+// 道具の耐久を1消費、壊れたら除去
+function useTool(name){
+  state.durability[name]=(state.durability[name]||0)-1;
+  if(state.durability[name]<=0){
+    delete state.durability[name];
+    state.tools[name]--;
+    if(state.tools[name]<=0)delete state.tools[name];
+    addLog(`💔 【${name}】が壊れた！新しく作り直そう`,"bad");
+    return false; // 壊れた
+  }
+  return true;
+}
+
+// 武器の耐久を1消費
+function useWeapon(name){
+  if(!(state.inventory[name]>0))return false;
+  state.durability[name]=(state.durability[name]||0)-1;
+  if(state.durability[name]<=0){
+    delete state.durability[name];
+    state.inventory[name]--;
+    if(state.inventory[name]<=0)delete state.inventory[name];
+    addLog(`💔 【${name}】が壊れた！`,"bad");
+    return false;
+  }
+  return true;
+}
+
+// ======== 採集 ========
+function gather(idx){
+  if(gatherTimers[idx])return;
+  const m=MATERIALS[idx];
+  if(m.requireTool&&!hasTool(m.requireTool)){
+    const owned=(state.tools[m.requireTool]||0)>0;
+    addLog(owned?`💔 【${m.requireTool}】の耐久が切れています。作り直してください`:`🔒 【${m.name}】には「${m.requireTool}」が必要です`,"bad");
+    return;
+  }
+  const total=m.duration;
+  gatherTimers[idx]={remaining:total,total,toolUsed:m.requireTool};
+  renderGatherBtn(idx);
+  gatherTimers[idx].interval=setInterval(()=>{
+    gatherTimers[idx].remaining--;
+    renderGatherBtn(idx);
+    if(gatherTimers[idx].remaining<=0){
+      clearInterval(gatherTimers[idx].interval);
+      const toolName=gatherTimers[idx].toolUsed;
+      delete gatherTimers[idx];
+      const qty=rand(m.qty[0],m.qty[1]);
+      state.inventory[m.name]=(state.inventory[m.name]||0)+qty;
+      addLog(`${m.emoji} ${m.name}(T${m.tier}) × ${qty}個 採集！`,"good");
+      // 道具耐久消費
+      if(toolName){
+        const alive=useTool(toolName);
+        if(alive){
+          const cur=state.durability[toolName]||0;
+          const td=TOOLS.find(t=>t.name===toolName);
+          addLog(`🔧 ${toolName} 耐久: ${cur}/${td?.maxDur||'?'}`,"info");
+        }
+      }
+      render();
+    }
+  },1000);
+}
+function renderGatherBtn(i){
+  const btn=document.getElementById(`gather-btn-${i}`);if(!btn)return;
+  const m=MATERIALS[i];const timer=gatherTimers[i];
+  const locked=m.requireTool&&!hasTool(m.requireTool);
+  if(timer){
+    const pct=Math.round((1-timer.remaining/timer.total)*100);
+    btn.classList.add("gathering");btn.disabled=true;
+    btn.innerHTML=`${tierBadge(m.tier)}<div style="font-size:15px">${m.emoji}</div><div class="mat-name">${m.name}</div>
+      <div class="gather-progress-bg"><div class="gather-progress-bar" style="width:${pct}%"></div></div>
+      <div class="gather-countdown">${timer.remaining}秒</div>`;
+  }else{
+    btn.classList.remove("gathering");btn.disabled=false;
+    btn.innerHTML=`${tierBadge(m.tier)}<div style="font-size:15px">${m.emoji}</div><div class="mat-name">${m.name}</div>
+      ${locked?`<div class="tool-lock">🔒 ${m.requireTool}</div>`:`<div class="mat-time">${m.duration}秒</div>`}`;
+  }
+}
+
+// ======== 加工 ========
+function startProcess(idx){
+  if(processTimers[idx])return;
+  const p=PROCESSES[idx];
+  for(const [mat,qty] of Object.entries(p.ingredients)){
+    if((state.inventory[mat]||0)<qty){addLog(`❌ 加工素材不足：${mat} × ${qty}個 必要`,"bad");return;}
+  }
+  for(const [mat,qty] of Object.entries(p.ingredients)){
+    state.inventory[mat]-=qty;
+    if(state.inventory[mat]<=0)delete state.inventory[mat];
+  }
+  addLog(`${p.methodEmoji} ${p.method}開始：【${p.name}】を加工中… (${p.duration}秒)`,"info");
+  processTimers[idx]={remaining:p.duration,total:p.duration};
+  renderProcessBtn(idx);
+  render();
+  processTimers[idx].interval=setInterval(()=>{
+    processTimers[idx].remaining--;
+    renderProcessBtn(idx);
+    if(processTimers[idx].remaining<=0){
+      clearInterval(processTimers[idx].interval);delete processTimers[idx];
+      state.inventory[p.name]=(state.inventory[p.name]||0)+p.output;
+      addLog(`✅ ${p.methodEmoji} ${p.method}完了！【${p.name}】× ${p.output}個 獲得！`,"good");
+      render();
+    }
+  },1000);
+}
+function renderProcessBtn(i){
+  const el=document.getElementById(`process-item-${i}`);if(!el)return;
+  const p=PROCESSES[i];const timer=processTimers[i];
+  const progArea=el.querySelector(".process-prog-area");
+  const btn=el.querySelector(".process-btn");
+  if(timer){
+    const pct=Math.round((1-timer.remaining/timer.total)*100);
+    el.classList.add("active");
+    if(btn)btn.disabled=true;
+    if(progArea)progArea.innerHTML=`
+      <div class="process-prog-bg"><div class="process-prog-bar" style="width:${pct}%"></div></div>
+      <div class="process-countdown">${p.methodEmoji} ${p.method}中… ${timer.remaining}秒</div>`;
+  }else{
+    el.classList.remove("active");
+    if(btn)btn.disabled=false;
+    if(progArea)progArea.innerHTML="";
+  }
+}
+
+// ======== 道具クラフト ========
+function craftTool(i){
+  const t=TOOLS[i];
+  for(const [mat,qty] of Object.entries(t.ingredients)){
+    if((state.inventory[mat]||0)<qty){addLog(`❌ 素材不足：${mat} × ${qty}個 必要`,"bad");return;}
+  }
+  for(const [mat,qty] of Object.entries(t.ingredients)){
+    state.inventory[mat]-=qty;if(state.inventory[mat]<=0)delete state.inventory[mat];
+  }
+  state.tools[t.name]=(state.tools[t.name]||0)+1;
+  state.durability[t.name]=t.maxDur; // 耐久初期化
+  addLog(`🔧 道具【${t.emoji}${t.name}】を作成！(耐久: ${t.maxDur})`,"event");
+  render();
+}
+
+// ======== 装備クラフト ========
+function craftItem(i){
+  const r=RECIPES[i];
+  for(const [mat,qty] of Object.entries(r.ingredients)){
+    if((state.inventory[mat]||0)<qty){addLog(`❌ 素材不足：${mat} × ${qty}個 必要`,"bad");return;}
+  }
+  for(const [mat,qty] of Object.entries(r.ingredients)){
+    state.inventory[mat]-=qty;if(state.inventory[mat]<=0)delete state.inventory[mat];
+  }
+  state.inventory[r.name]=(state.inventory[r.name]||0)+1;
+  if(r.maxDur>0) state.durability[r.name]=r.maxDur; // 武器耐久初期化
+  const durNote=r.maxDur>0?` (耐久: ${r.maxDur})`:"";
+  addLog(`${r.emoji} 【${r.name}】をクラフト！${durNote}`,"good");
+  render();
+}
+
+// ======== 売買 ========
+function sell(name){
+  const inInv=(state.inventory[name]||0);
+  const inTool=(state.tools[name]||0);
+  if(inInv<=0&&inTool<=0)return;
+  const price=state.market[name]?.price||0;
+  if(inInv>0){state.inventory[name]--;if(state.inventory[name]<=0)delete state.inventory[name];}
+  else{state.tools[name]--;if(state.tools[name]<=0)delete state.tools[name];}
+  state.gold+=price;
+  addLog(`💰 【${name}】を ${price}G で売却！`,"good");
+  checkGoal();saveGame();render();
+}
+function buy(name){
+  const price=state.market[name]?.price||0;
+  if(state.gold<price){addLog(`❌ 所持金不足 (${price}G 必要)`,"bad");return;}
+  state.gold-=price;
+  const isTool=TOOLS.some(t=>t.name===name);
+  if(isTool){
+    state.tools[name]=(state.tools[name]||0)+1;
+    const td=TOOLS.find(t=>t.name===name);
+    state.durability[name]=td.maxDur;
+  } else {
+    state.inventory[name]=(state.inventory[name]||0)+1;
+    const rd=RECIPES.find(r=>r.name===name);
+    if(rd?.maxDur>0) state.durability[name]=rd.maxDur;
+  }
+  addLog(`🛒 【${name}】を ${price}G で購入！`,"info");
+  render();
+}
+
+// ======== 戦闘 ========
+function attackEnemy(id){
+  // スロット配列からidで検索
+  const enemy=state.enemies.find(e=>e&&!e.isRespawning&&e.id===id);
+  if(!enemy||enemy.hp<=0)return;
+
+  // 武器チェック（耐久あり）
+  const swordNames=["上質な剣","鉄の剣"];
+  let activeWeapon=null;
+  for(const wn of swordNames){
+    if((state.inventory[wn]||0)>0&&(state.durability[wn]||0)>0){activeWeapon=wn;break;}
+  }
+  const hasArmor=(state.inventory["革の鎧"]||0)+(state.inventory["竜の鎧"]||0)>0;
+
+  let dmg;
+  if(activeWeapon==="上質な剣")    dmg=rand(30,50);
+  else if(activeWeapon==="鉄の剣") dmg=rand(18,30);
+  else                              dmg=rand(1,5);
+
+  enemy.hp=Math.max(0,enemy.hp-dmg);
+
+  // フラッシュアニメ（スロットIDで取得）
+  const el=document.getElementById(`enemy-slot-${enemy.slotIndex}`);
+  if(el){el.classList.remove("enemy-flash");void el.offsetWidth;el.classList.add("enemy-flash");}
+
+  if(!activeWeapon){
+    addLog(`👊 素手で殴ったが ${dmg} しか入らない…（武器が必要！）`,"bad");
+  }else{
+    addLog(`⚔️ ${enemy.emoji}${enemy.name} に ${dmg} ダメージ！(残HP:${enemy.hp})`,"combat");
+    const alive=useWeapon(activeWeapon);
+    if(alive){
+      const cur=state.durability[activeWeapon]||0;
+      if(cur<=3)addLog(`⚠️ ${activeWeapon} の耐久が残り${cur}！`,"bad");
+    }
+  }
+
+  if(enemy.hp<=0){
+    addLog(`💥 ${enemy.emoji}${enemy.name} を倒した！`,"combat");
+    showDropModal(enemy);
+    scheduleRespawn(enemy.slotIndex);
+  }else{
+    let d=enemy.atk+rand(-3,3);if(hasArmor)d=Math.max(1,Math.round(d*0.5));
+    const lost=Math.min(state.gold,d*2);state.gold=Math.max(0,state.gold-lost);
+    if(lost>0)addLog(`💢 ${enemy.emoji}の反撃！${lost}G を失った`,"bad");
+  }
+  render();
+}
+
+function renderEnemySlot(slotIndex){
+  const el=document.getElementById(`enemy-slot-${slotIndex}`);
+  if(!el)return;
+  const e=state.enemies[slotIndex];
+  if(!e||!e.isRespawning)return;
+  const rem=e.respawnRemaining;
+  const pct=Math.round((1-rem/RESPAWN_SECS)*100);
+  el.querySelector('.enemy-level').textContent=`${rem}秒後`;
+  el.querySelector('.hp-bar').style.width=`${pct}%`;
+  // バッジ更新
+  const livingCount=state.enemies.filter(e=>e&&!e.isRespawning&&e.hp>0).length;
+  const badge=document.getElementById("enemy-badge");
+  if(badge){badge.textContent=livingCount>0?livingCount:"";badge.style.display=livingCount>0?"inline":"none";}
+}
+
+// ======== ドロップ抽選ポップアップ ========
+function showDropModal(enemy){
+  // 通常ドロップ（即付与）
+  const dropped=[];
+  for(const d of enemy.drops){
+    const qty=rand(d.qty[0],d.qty[1]);
+    state.inventory[d.name]=(state.inventory[d.name]||0)+qty;
+    dropped.push({name:d.name,qty,key:false,emoji:getMaterialEmoji(d.name)});
+  }
+  // レアドロップ
+  if(enemy.rare&&Math.random()<enemy.rare.prob){
+    state.inventory[enemy.rare.name]=(state.inventory[enemy.rare.name]||0)+1;
+    dropped.push({name:enemy.rare.name,qty:1,key:false,emoji:"✨"});
+  }
+  // 鍵ドロップ抽選（非表示で裏処理）
+  let keyDropped=null;
+  if(enemy.keyDrop&&Math.random()<enemy.keyDrop.prob){
+    const kn=enemy.keyDrop.name;
+    state.inventory[kn]=(state.inventory[kn]||0)+1;
+    keyDropped={name:kn,emoji:enemy.keyDrop.emoji};
+  }
+
+  // ログ
+  const logItems=dropped.map(d=>`${d.name}×${d.qty}`);
+  if(keyDropped) logItems.push(`🔑${keyDropped.name}`);
+  addLog(`🎁 ドロップ: ${logItems.join(", ")}`,"good");
+
+  // モーダルに表示
+  document.getElementById("drop-enemy-name").textContent=`${enemy.emoji} ${enemy.name}`;
+  const itemsEl=document.getElementById("drop-items");
+  itemsEl.innerHTML=dropped.map(d=>`
+    <div class="drop-item">
+      <span class="drop-item-emoji">${d.emoji}</span>
+      <span class="drop-item-name">${d.name}</span>
+      <span class="drop-item-qty">×${d.qty}</span>
+    </div>`).join("")
+  +(keyDropped?`
+    <div class="drop-item key-item">
+      <span class="drop-item-emoji">${keyDropped.emoji}</span>
+      <span class="drop-item-name">${keyDropped.name}</span>
+      <span class="drop-item-qty">×1</span>
+    </div>`:"");
+
+  const noKeyEl=document.getElementById("drop-no-key");
+  noKeyEl.textContent=keyDropped?"":"（今回は鍵はドロップしませんでした）";
+
+  document.getElementById("drop-overlay").classList.add("show");
+  render();
+}
+function closeDropModal(){
+  document.getElementById("drop-overlay").classList.remove("show");
+}
+function getMaterialEmoji(name){
+  const m=MATERIALS.find(x=>x.name===name);
+  if(m)return m.emoji;
+  const p=PROCESSES.find(x=>x.name===name);
+  if(p)return p.emoji;
+  return"📦";
+}
+
+// ======== ターン ========
+function nextTurn(){
+  state.turn++;
+  const evs=updateMarket();
+  addLog(`─── ターン ${state.turn} ───`,"info");
+  evs.forEach(e=>addLog(e,"event"));
+  saveGame();
+  resetTimer();render();
+}
+function checkGoal(){if(state.gold>=state.goal)addLog(`🎉 目標達成！5000G 稼いだ！おめでとう！`,"event");}
+
+// ======== 市場 ========
+function updateMarket(){
+  const evs=[];
+  for(const [name,item] of Object.entries(state.market)){
+    item.prevPrice=item.price;
+    const diff=item.demand-item.supply,rate=diff/Math.max(item.supply,1);
+    item.price=Math.max(10,Math.round(item.price+item.price*rate*(0.3+Math.random()*0.4)));
+    if(item.demand>item.supply){item.supply=Math.round(item.supply*(1.05+Math.random()*0.1));item.demand=Math.round(item.demand*(0.95+Math.random()*0.07));}
+    else{item.supply=Math.round(item.supply*(0.90+Math.random()*0.08));item.demand=Math.round(item.demand*(1.02+Math.random()*0.08));}
+    const ev=Math.random();
+    if(ev<0.08){item.demand=Math.round(item.demand*(1.2+Math.random()*0.3));evs.push(`⚔️ 戦乱！【${name}】需要急増！`);}
+    else if(ev<0.13){item.supply=Math.round(item.supply*(1.2+Math.random()*0.2));evs.push(`🌾 豊作！【${name}】供給急増！`);}
+  }
+  return evs;
+}
+
+// ======== ダンジョン定義 ========
+const DUNGEONS=[
+  {
+    id:"goblin_lair",
+    name:"ゴブリンの巣窟",
+    emoji:"🕳️",
+    key:"古びた鍵",
+    keyEmoji:"🗝️",
+    desc:"ゴブリンたちのねぐら。薬草や皮が眠る",
+    waves:[
+      [{name:"ゴブリン",emoji:"👺",hp:400, atk:10}],
+      [{name:"ゴブリン",emoji:"👺",hp:400, atk:10},{name:"ゴブリン",emoji:"👺",hp:350,atk:8}],
+      [{name:"ゴブリン頭領",emoji:"👺",hp:900,atk:18}],
+    ],
+    rewards:[
+      {name:"薬草",qty:[8,14],emoji:"🌿"},
+      {name:"皮",qty:[5,10],emoji:"🦌"},
+      {name:"濃縮エキス",qty:[2,4],emoji:"🧴"},
+      {name:"ゴブリンの宝石",qty:[1,2],emoji:"💚",gold:300},
+    ],
+    legendaryReward:{name:"古の護符",emoji:"🪬",gold:800,prob:0.3},
+  },
+  {
+    id:"stone_fort",
+    name:"石造りの砦",
+    emoji:"🏯",
+    key:"石造りの鍵",
+    keyEmoji:"🔑",
+    desc:"オークとトロールが守る堅固な砦",
+    waves:[
+      [{name:"オーク見張り",emoji:"👹",hp:600,atk:18}],
+      [{name:"オーク戦士",emoji:"👹",hp:700,atk:20},{name:"スケルトン",emoji:"💀",hp:500,atk:12}],
+      [{name:"オーク将軍",emoji:"👹",hp:1200,atk:28}],
+      [{name:"砦のトロール",emoji:"🗿",hp:2000,atk:35}],
+    ],
+    rewards:[
+      {name:"鉄鉱石",qty:[10,16],emoji:"⛏️"},
+      {name:"鉄インゴット",qty:[4,7],emoji:"🔩"},
+      {name:"鋼鉄板",qty:[2,4],emoji:"⚙️"},
+      {name:"砦の金貨",qty:[1,3],emoji:"🪙",gold:500},
+    ],
+    legendaryReward:{name:"騎士の勲章",emoji:"🎖️",gold:1500,prob:0.25},
+  },
+  {
+    id:"dark_tower",
+    name:"暗黒の塔",
+    emoji:"🗼",
+    key:"魔封の鍵",
+    keyEmoji:"🔮",
+    desc:"ダークメイジが封印した魔力の塔",
+    waves:[
+      [{name:"魔法使いの弟子",emoji:"🧙",hp:700,atk:22}],
+      [{name:"ダークメイジ",emoji:"🧙",hp:900,atk:28},{name:"魔法使いの弟子",emoji:"🧙",hp:600,atk:18}],
+      [{name:"影の刺客",emoji:"🥷",hp:800,atk:32}],
+      [{name:"塔の番人",emoji:"🧙",hp:1800,atk:40}],
+      [{name:"大魔導士",emoji:"🧙",hp:3000,atk:50}],
+    ],
+    rewards:[
+      {name:"霊薬草",qty:[8,12],emoji:"🌺"},
+      {name:"魔法薬液",qty:[3,6],emoji:"💧"},
+      {name:"魔封の水晶",qty:[1,2],emoji:"🔮",gold:600},
+      {name:"霊薬ポーション",qty:[2,4],emoji:"💜"},
+    ],
+    legendaryReward:{name:"魔導書の断片",emoji:"📜",gold:2500,prob:0.2},
+  },
+  {
+    id:"dragon_lair",
+    name:"竜の王城",
+    emoji:"🏰",
+    key:"竜の鍵",
+    keyEmoji:"🔥🔑",
+    desc:"伝説の竜が眠る究極のダンジョン",
+    waves:[
+      [{name:"ドラゴンの子",emoji:"🐉",hp:1500,atk:35}],
+      [{name:"ドラゴンの子",emoji:"🐉",hp:1500,atk:35},{name:"ドラゴンの子",emoji:"🐉",hp:1200,atk:30}],
+      [{name:"古竜の守護者",emoji:"🐲",hp:3000,atk:50}],
+      [{name:"竜王",emoji:"🐲",hp:6000,atk:65}],
+    ],
+    rewards:[
+      {name:"竜の鱗",qty:[5,9],emoji:"🔥"},
+      {name:"星屑鉱石",qty:[3,6],emoji:"⭐"},
+      {name:"竜の心臓",qty:[1,1],emoji:"❤️‍🔥",gold:1500},
+    ],
+    legendaryReward:{name:"竜王の王冠",emoji:"👑",gold:8000,prob:0.15},
+  },
+];
+
+// ダンジョン進行状態
+const dungeonState={
+  active:false,
+  dungeonId:null,
+  waveIndex:0,
+  currentEnemy:null,
+  finished:false,
+  win:false,
+};
+
+function enterDungeon(id){
+  const dungeon=DUNGEONS.find(d=>d.id===id);
+  if(!dungeon)return;
+  const keyCount=state.inventory[dungeon.key]||0;
+  if(keyCount<=0){addLog(`🔒 【${dungeon.key}】が必要です`,"bad");return;}
+  // 鍵消費
+  state.inventory[dungeon.key]--;
+  if(state.inventory[dungeon.key]<=0)delete state.inventory[dungeon.key];
+  addLog(`🏰 【${dungeon.name}】に突入！ ${dungeon.key}を1個消費`,"event");
+
+  dungeonState.active=true;
+  dungeonState.dungeonId=id;
+  dungeonState.waveIndex=0;
+  dungeonState.finished=false;
+  dungeonState.win=false;
+  startDungeonWave(dungeon,0);
+  render();
+}
+
+function startDungeonWave(dungeon,waveIdx){
+  const waveDef=dungeon.waves[waveIdx];
+  // 複数敵がいるウェーブは1体ずつ順番に処理（先頭から）
+  const enemyDef=waveDef[0];
+  dungeonState.currentEnemy={
+    ...enemyDef,
+    maxHp:enemyDef.hp,
+    waveEnemyIndex:0,
+    waveDef,
+  };
+  renderDungeonModal(dungeon);
+  document.getElementById("dungeon-overlay").classList.add("show");
+}
+
+function dungeonAttack(){
+  const dungeon=DUNGEONS.find(d=>d.id===dungeonState.dungeonId);
+  if(!dungeon||!dungeonState.currentEnemy)return;
+  const enemy=dungeonState.currentEnemy;
+
+  // 武器チェック
+  const swordNames=["上質な剣","鉄の剣"];
+  let activeWeapon=null;
+  for(const wn of swordNames){
+    if((state.inventory[wn]||0)>0&&(state.durability[wn]||0)>0){activeWeapon=wn;break;}
+  }
+  const hasArmor=(state.inventory["革の鎧"]||0)+(state.inventory["竜の鎧"]||0)>0;
+
+  let dmg;
+  if(activeWeapon==="上質な剣")    dmg=rand(30,55);
+  else if(activeWeapon==="鉄の剣") dmg=rand(18,32);
+  else                              dmg=rand(1,5);
+
+  enemy.hp=Math.max(0,enemy.hp-dmg);
+
+  // アニメ
+  const ec=document.getElementById("dungeon-enemy-card");
+  if(ec){ec.classList.remove("dungeon-hit");void ec.offsetWidth;ec.classList.add("dungeon-hit");}
+
+  // 武器耐久消費
+  if(activeWeapon){
+    const alive=useWeapon(activeWeapon);
+    if(alive&&(state.durability[activeWeapon]||0)<=3)
+      addLog(`⚠️ ${activeWeapon} 耐久残り${state.durability[activeWeapon]}！`,"bad");
+  }
+
+  if(enemy.hp<=0){
+    // 同ウェーブに次の敵がいるか
+    const nextIdx=enemy.waveEnemyIndex+1;
+    if(nextIdx<enemy.waveDef.length){
+      const nextDef=enemy.waveDef[nextIdx];
+      dungeonState.currentEnemy={...nextDef,maxHp:nextDef.hp,waveEnemyIndex:nextIdx,waveDef:enemy.waveDef};
+      addLog(`💥 ${enemy.emoji}${enemy.name} を倒した！次の敵が来る！`,"combat");
+    } else {
+      // ウェーブクリア
+      addLog(`✅ ウェーブ${dungeonState.waveIndex+1} クリア！`,"event");
+      dungeonState.waveIndex++;
+      if(dungeonState.waveIndex>=dungeon.waves.length){
+        // ダンジョンクリア
+        dungeonClear(dungeon);
+        return;
+      } else {
+        startDungeonWave(dungeon,dungeonState.waveIndex);
+        return;
+      }
+    }
+  } else {
+    // 敵の反撃
+    let atkDmg=enemy.atk+rand(-4,4);
+    if(hasArmor)atkDmg=Math.max(1,Math.round(atkDmg*0.5));
+    const lost=Math.min(state.gold,atkDmg*3);
+    state.gold=Math.max(0,state.gold-lost);
+    if(lost>0)addLog(`💢 ${enemy.emoji}の反撃！${lost}G 失った`,"bad");
+  }
+  renderDungeonModal(dungeon);
+  render();
+}
+
+function dungeonClear(dungeon){
+  dungeonState.finished=true;
+  dungeonState.win=true;
+  dungeonState.active=false;
+  addLog(`🎉 【${dungeon.name}】クリア！お宝獲得！`,"event");
+
+  // 報酬付与
+  const rewards=[];
+  for(const r of dungeon.rewards){
+    const qty=rand(r.qty[0],r.qty[1]);
+    state.inventory[r.name]=(state.inventory[r.name]||0)+qty;
+    if(r.gold) state.gold+=r.gold*qty;
+    rewards.push({...r,actualQty:qty});
+  }
+  // レジェンダリー抽選
+  let legendary=null;
+  if(dungeon.legendaryReward&&Math.random()<dungeon.legendaryReward.prob){
+    state.gold+=dungeon.legendaryReward.gold;
+    legendary=dungeon.legendaryReward;
+    addLog(`👑 レジェンダリー報酬！【${legendary.name}】+${legendary.gold}G！`,"event");
+  }
+  saveGame();
+  renderDungeonResult(dungeon,rewards,legendary,true);
+  render();
+}
+
+function dungeonFlee(){
+  dungeonState.active=false;
+  dungeonState.finished=true;
+  dungeonState.win=false;
+  addLog(`🏃 ダンジョンから撤退した…`,"bad");
+  renderDungeonResult(null,null,null,false);
+}
+
+function closeDungeon(){
+  document.getElementById("dungeon-overlay").classList.remove("show");
+  dungeonState.active=false;
+  dungeonState.finished=false;
+  render();
+}
+
+function renderDungeonModal(dungeon){
+  document.getElementById("dungeon-modal-title").textContent=`${dungeon.emoji} ${dungeon.name}`;
+  document.getElementById("dungeon-wave-info").textContent=
+    `WAVE ${dungeonState.waveIndex+1} / ${dungeon.waves.length}`;
+
+  // 進捗ドット
+  document.getElementById("dungeon-progress").innerHTML=
+    dungeon.waves.map((_,i)=>`<div class="wave-dot ${i<dungeonState.waveIndex?"done":i===dungeonState.waveIndex?"active":""}"></div>`).join("");
+
+  // 敵表示
+  const e=dungeonState.currentEnemy;
+  const pct=Math.round(e.hp/e.maxHp*100);
+  const col=pct>50?"var(--green)":pct>25?"var(--gold)":"var(--red)";
+  document.getElementById("dungeon-enemy-area").innerHTML=`
+    <div class="dungeon-enemy-card" id="dungeon-enemy-card">
+      <div class="dungeon-enemy-emoji">${e.emoji}</div>
+      <div class="dungeon-enemy-name">${e.name}</div>
+      <div class="dungeon-hp-label">HP ${e.hp} / ${e.maxHp}</div>
+      <div class="dungeon-hp-bg"><div class="dungeon-hp-bar" style="width:${pct}%;background:linear-gradient(90deg,#6a0a0a,${col})"></div></div>
+      <button class="dungeon-atk-btn" onclick="dungeonAttack()">⚔️ 攻撃する</button>
+    </div>
+    <div style="margin-top:8px;text-align:center">
+      <button onclick="dungeonFlee()" style="background:none;border:none;color:var(--text-dim);font-size:10px;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:1px;text-decoration:underline">撤退する</button>
+    </div>`;
+  document.getElementById("dungeon-result-area").innerHTML="";
+}
+
+function renderDungeonResult(dungeon,rewards,legendary,win){
+  document.getElementById("dungeon-enemy-area").innerHTML="";
+  if(win&&dungeon){
+    document.getElementById("dungeon-result-area").innerHTML=`
+      <div class="dungeon-result">
+        <div class="dungeon-result-title win">🎉 DUNGEON CLEAR！</div>
+        <div class="dungeon-result-rewards">
+          ${rewards.map(r=>`
+            <div class="dungeon-reward-item">
+              <span style="font-size:18px">${r.emoji}</span>
+              <span style="flex:1;font-size:13px;font-weight:600">${r.name}</span>
+              <span style="color:var(--gold);font-weight:700">×${r.actualQty}${r.gold?` +${r.gold*r.actualQty}G`:""}</span>
+            </div>`).join("")}
+          ${legendary?`<div class="dungeon-reward-item legendary">
+            <span style="font-size:18px">${legendary.emoji}</span>
+            <span style="flex:1;font-size:13px;font-weight:600;color:var(--gold)">${legendary.name}</span>
+            <span style="color:#c44;font-weight:700">+${legendary.gold}G 👑</span>
+          </div>`:""}
+        </div>
+        <button class="dungeon-close-btn" onclick="closeDungeon()">閉じる</button>
+      </div>`;
+  } else {
+    document.getElementById("dungeon-result-area").innerHTML=`
+      <div class="dungeon-result">
+        <div class="dungeon-result-title lose">💀 撤退…</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px">また鍵を集めて挑戦しよう</div>
+        <button class="dungeon-close-btn" onclick="closeDungeon()">閉じる</button>
+      </div>`;
+  }
+}
+let currentTab='process';
+function switchTab(name){
+  currentTab=name;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`tab-content-${name}`).classList.add('active');
+}
+
+// ======== タイマー ========
+const TURN_SECS=90;let timerRem=TURN_SECS,timerInt=null;
+function resetTimer(){timerRem=TURN_SECS;updateTimerDisplay();}
+function updateTimerDisplay(){
+  const m=Math.floor(timerRem/60),s=timerRem%60;
+  document.getElementById("timer-num").textContent=`${m}:${s.toString().padStart(2,"0")}`;
+  const ring=document.getElementById("timer-ring");
+  const circ=2*Math.PI*15;
+  ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=circ*(1-timerRem/TURN_SECS);
+  ring.style.stroke=timerRem/TURN_SECS>0.33?"#c9a84c":"#c44";
+}
+function startTimer(){timerInt=setInterval(()=>{timerRem--;updateTimerDisplay();if(timerRem<=0)nextTurn();},1000);}
+
+// ======== RENDER ========
+function netWorth(){
+  let t=state.gold;
+  for(const [n,q] of Object.entries(state.inventory))t+=(state.market[n]?.price||0)*q;
+  for(const [n,q] of Object.entries(state.tools))t+=(state.market[n]?.price||0)*q;
+  return t;
+}
+function trendIcon(item){
+  if(item.price>item.prevPrice)return`<span class="trend up">▲</span>`;
+  if(item.price<item.prevPrice)return`<span class="trend down">▼</span>`;
+  return`<span class="trend">—</span>`;
+}
+function sBadge(item){
+  if(item.demand>item.supply*1.1)return`<span class="badge badge-scarce">品薄</span>`;
+  if(item.supply>item.demand*1.1)return`<span class="badge badge-surplus">過剰</span>`;
+  return`<span class="badge badge-stable">安定</span>`;
+}
+
+function render(){
+  document.getElementById("gold").textContent=state.gold.toLocaleString()+"G";
+  document.getElementById("turn").textContent=state.turn;
+  const nw=netWorth();
+  const nwEl=document.getElementById("networth");
+  nwEl.textContent=nw.toLocaleString()+"G";nwEl.className="stat-value "+(nw>=state.goal?"green":"green");
+
+  // ダンジョン一覧
+  const dungeonListEl=document.getElementById("dungeon-list");
+  if(dungeonListEl){
+    let totalKeys=0;
+    dungeonListEl.innerHTML=DUNGEONS.map(d=>{
+      const keyCount=state.inventory[d.key]||0;
+      const unlocked=keyCount>0;
+      if(unlocked)totalKeys++;
+      return`<div class="dungeon-card ${unlocked?"unlocked":"locked"}">
+        <div class="dungeon-header">
+          <span class="dungeon-emoji">${d.emoji}</span>
+          <div class="dungeon-info">
+            <div class="dungeon-name">${d.name}</div>
+            <div class="dungeon-key">${d.keyEmoji} ${d.key} ${unlocked?`× ${keyCount}`:"（未入手）"}</div>
+          </div>
+        </div>
+        <div class="dungeon-waves">⚔️ ${d.waves.length}ウェーブ制</div>
+        <div class="dungeon-rewards">
+          🎁 ${d.rewards.map(r=>r.name).join("・")}<br>
+          👑 ${d.legendaryReward.name}（確率${Math.round(d.legendaryReward.prob*100)}%）+${d.legendaryReward.gold.toLocaleString()}G
+        </div>
+        <button class="dungeon-enter-btn" onclick="enterDungeon('${d.id}')" ${unlocked?"":"disabled"}>
+          ${unlocked?"🏰 入場する（鍵を1個使用）":"🔒 鍵が必要"}
+        </button>
+      </div>`;
+    }).join("");
+    // ダンジョンバッジ
+    const dbadge=document.getElementById("dungeon-badge");
+    if(dbadge){dbadge.textContent=totalKeys>0?totalKeys:"";dbadge.style.display=totalKeys>0?"inline":"none";}
+  }
+  const livingCount=state.enemies.filter(e=>e&&!e.isRespawning&&e.hp>0).length;
+  const badge=document.getElementById("enemy-badge");
+  if(badge){badge.textContent=livingCount>0?livingCount:"";badge.style.display=livingCount>0?"inline":"none";}
+
+  // 採集
+  let gh="";
+  for(const tier of[1,2,3,4,5]){
+    const mats=MATERIALS.map((m,i)=>({...m,i})).filter(m=>m.tier===tier);
+    if(!mats.length)continue;
+    const ti=TIER_INFO[tier];
+    gh+=`<div class="tier-label"><span class="tier ${ti.cls}">${ti.label}</span> ${TIER_NAMES[tier]}</div><div class="gather-grid">`;
+    mats.forEach(m=>{
+      const locked=m.requireTool&&!hasTool(m.requireTool);
+      gh+=`<button class="gather-btn" id="gather-btn-${m.i}" onclick="gather(${m.i})">
+        ${tierBadge(m.tier)}<div style="font-size:14px">${m.emoji}</div>
+        <div class="mat-name">${m.name}</div>
+        ${locked?`<div class="tool-lock">🔒 ${m.requireTool}</div>`:`<div class="mat-time">${m.duration}秒</div>`}
+      </button>`;
+    });
+    gh+=`</div>`;
+  }
+  document.getElementById("gather-section").innerHTML=gh;
+  Object.keys(gatherTimers).forEach(i=>renderGatherBtn(Number(i)));
+
+  // インベントリ（耐久バー付き）
+  const allItems=[
+    ...Object.entries(state.inventory).map(([n,q])=>({n,q,tool:false})),
+    ...Object.entries(state.tools).map(([n,q])=>({n,q,tool:true})),
+  ];
+  document.getElementById("inventory").innerHTML=allItems.length===0
+    ?`<div style="color:var(--text-dim);font-size:10px;padding:3px 0">— 何も持っていない —</div>`
+    :allItems.map(({n,q,tool})=>{
+      const toolDef=TOOLS.find(t=>t.name===n);
+      const recDef=RECIPES.find(r=>r.name===n&&r.maxDur>0);
+      const maxDur=(toolDef?.maxDur||recDef?.maxDur||0);
+      const hasDur=maxDur>0&&state.durability[n]!==undefined;
+      return`<div class="inv-item" style="flex-direction:column;align-items:stretch;gap:0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="inv-name">${tool?"🔧":""}${n}</span>
+          <span class="inv-qty">×${q}</span>
+        </div>
+        ${hasDur?durBar(n,maxDur):""}
+      </div>`;
+    }).join("");
+
+  // 加工
+  // 加工をメソッド別にグループ化
+  const methodOrder=["鍛冶","木工","なめし","醸造"];
+  let ph="";
+  for(const method of methodOrder){
+    const procs=PROCESSES.map((p,i)=>({...p,i})).filter(p=>p.method===method);
+    if(!procs.length)continue;
+    const emoji=procs[0].methodEmoji;
+    ph+=`<div class="section-title">${emoji} ${method}</div>`;
+    procs.forEach(p=>{
+      const canDo=Object.entries(p.ingredients).every(([m,q])=>(state.inventory[m]||0)>=q);
+      const inProg=!!processTimers[p.i];
+      const recipeStr=Object.entries(p.ingredients).map(([m,q])=>{
+        const have=state.inventory[m]||0;
+        return`<span style="color:${have>=q?'#6da':'#da6'}">${m}×${q}(${have})</span>`;
+      }).join(" ");
+      ph+=`<div class="process-item${inProg?" active":""}" id="process-item-${p.i}">
+        <div class="process-header">
+          <span class="process-name">${p.emoji} ${p.name}</span>
+          <button class="process-btn" onclick="startProcess(${p.i})" ${(canDo&&!inProg)?"":"disabled"}>加工</button>
+        </div>
+        <div class="process-method">${p.methodEmoji} ${p.method} → ×${p.output}個 / ${p.duration}秒</div>
+        <div class="process-recipe">${recipeStr}</div>
+        <div class="process-prog-area">${inProg?`
+          <div class="process-prog-bg"><div class="process-prog-bar" style="width:${Math.round((1-processTimers[p.i].remaining/processTimers[p.i].total)*100)}%"></div></div>
+          <div class="process-countdown">${emoji} ${method}中… ${processTimers[p.i].remaining}秒</div>`:""}
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById("process-list").innerHTML=ph;
+
+  // クラフト（装備）
+  let ch="";
+  ch+=RECIPES.map((r,i)=>{
+    const canC=Object.entries(r.ingredients).every(([m,q])=>(state.inventory[m]||0)>=q);
+    const rs=Object.entries(r.ingredients).map(([m,q])=>{
+      const h=state.inventory[m]||0;
+      return`<span style="color:${h>=q?'#6da':'#da6'}">${m}×${q}(${h})</span>`;
+    }).join(" ");
+    return`<div class="craft-item">
+      <div class="craft-header">
+        <span class="craft-name">${tierBadge(r.tier)}${r.emoji}${r.name}</span>
+        <button class="craft-btn" onclick="craftItem(${i})" ${canC?"":"disabled"}>作成</button>
+      </div>
+      <div class="craft-recipe">${rs}</div>
+    </div>`;
+  }).join("");
+
+  ch+=`<div class="section-title">🔧 道具（T4採集解放）</div>`;
+  ch+=TOOLS.map((t,i)=>{
+    const owned=(state.tools[t.name]||0)>0;
+    const canC=Object.entries(t.ingredients).every(([m,q])=>(state.inventory[m]||0)>=q);
+    const rs=Object.entries(t.ingredients).map(([m,q])=>{
+      const h=state.inventory[m]||0;
+      return`<span style="color:${h>=q?'#6da':'#da6'}">${m}×${q}(${h})</span>`;
+    }).join(" ");
+    return`<div class="craft-item${owned?" owned":""}">
+      <div class="craft-header">
+        <span class="craft-name">${t.emoji}${t.name}${owned?" ✅":""}</span>
+        <button class="craft-btn" onclick="craftTool(${i})" ${canC?"":"disabled"}>作成</button>
+      </div>
+      <div class="craft-recipe">${rs}</div>
+      <div style="font-size:9px;color:var(--text-dim)">${t.desc}</div>
+      ${owned?durBar(t.name,t.maxDur):""}
+    </div>`;
+  }).join("");
+  document.getElementById("craft-list").innerHTML=ch;
+
+  // マーケット
+  document.getElementById("market-list").innerHTML=Object.entries(state.market).map(([name,item])=>{
+    const inInv=invCount(name);const canBuy=state.gold>=item.price;
+    const mat=MATERIALS.find(m=>m.name===name);
+    const proc=PROCESSES.find(p=>p.name===name);
+    const tool=TOOLS.find(t=>t.name===name);
+    const rec=RECIPES.find(r=>r.name===name);
+    const tier=mat?.tier||(proc?2:tool?3:rec?.tier||2);
+    return`<div class="market-item">
+      <div class="market-header">
+        <span class="market-name">${tierBadge(tier)}${name}</span>
+        <span class="market-price">${item.price}G${trendIcon(item)}</span>
+      </div>
+      <div class="market-info"><span>供給${item.supply}</span><span>需要${item.demand}</span>${sBadge(item)}</div>
+      <div class="market-row">
+        <button class="sell-btn" onclick="sell('${name}')" ${inInv>0?"":"disabled"}>売(×${inInv})</button>
+        <button class="buy-btn"  onclick="buy('${name}')"  ${canBuy?"":"disabled"}>購入</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  // 敵（スロット固定・復活タイマー対応）
+  document.getElementById("enemy-list").innerHTML=state.enemies.map((e,i)=>{
+    if(!e||e.isRespawning){
+      const rem=e?e.respawnRemaining:0;
+      const pct=Math.round((1-rem/RESPAWN_SECS)*100);
+      return`<div class="enemy-card" id="enemy-slot-${i}" style="border-color:#2a2a2a;opacity:0.6">
+        <div class="enemy-header">
+          <span class="enemy-name" style="color:var(--text-dim)">⏳ 復活待ち</span>
+          <span class="enemy-level" style="color:#4af">${rem}秒後</span>
+        </div>
+        <div class="hp-bar-bg"><div class="hp-bar" style="width:${pct}%;background:linear-gradient(90deg,#2a4a8a,#4af)"></div></div>
+        <div class="enemy-drop" style="color:#2a3a4a">次の敵を準備中…</div>
+        <button class="attack-btn" disabled style="opacity:0.2">— 待機中 —</button>
+      </div>`;
+    }
+    const pct=Math.round(e.hp/e.maxHp*100);
+    const dropStr=e.drops.map(d=>d.name).join("・")+(e.rare?`・✨${e.rare.name}`:"")+(e.keyDrop?`・${e.keyDrop.emoji}鍵?`:"");
+    return`<div class="enemy-card" id="enemy-slot-${i}">
+      <div class="enemy-header">
+        <span class="enemy-name">${e.emoji} ${e.name}</span>
+        <span class="enemy-level">HP ${e.hp}/${e.maxHp}</span>
+      </div>
+      <div class="hp-bar-bg"><div class="hp-bar" style="width:${pct}%"></div></div>
+      <div class="enemy-drop">🎁 ${dropStr}</div>
+      <button class="attack-btn" onclick="attackEnemy(${e.id})">⚔️ 攻撃する</button>
+    </div>`;
+  }).join("");
+}
+
+function addLog(msg,type="info"){
+  const log=document.getElementById("log");
+  const el=document.createElement("div");el.className="log-entry "+type;el.textContent=msg;
+  log.appendChild(el);log.scrollTop=log.scrollHeight;
+}
+
+// ======== セーブ・ロード ========
+const SAVE_KEY="albion_save_v1";
+
+function saveGame(){
+  const saveData={
+    gold:state.gold,
+    turn:state.turn,
+    inventory:state.inventory,
+    tools:state.tools,
+    durability:state.durability,
+    savedAt:Date.now(),
+  };
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify(saveData));
+  }catch(e){}
+}
+
+function loadGame(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return false;
+    const data=JSON.parse(raw);
+    state.gold=data.gold||500;
+    state.turn=data.turn||1;
+    state.inventory=data.inventory||{};
+    state.tools=data.tools||{};
+    state.durability=data.durability||{};
+    return true;
+  }catch(e){return false;}
+}
+
+// 自動セーブ（30秒ごと）
+setInterval(saveGame, 30000);
+
+// 初期化
+const loaded=loadGame();
+initEnemies();
+if(loaded){
+  addLog("💾 セーブデータをロードしました","event");
+}else{
+  addLog("🗡️ ゲーム開始！採集 → 加工 → 道具クラフト → 売買！","event");
+  addLog("🔥 道具は【加工素材】が必要です。まず加工工房で素材を加工しましょう","info");
+  addLog("💰 目標: 5000Gを稼いで勝利！","info");
+}
+render();startTimer();updateTimerDisplay();
+
+// PWA: Service Worker登録
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
